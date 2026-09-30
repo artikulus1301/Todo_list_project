@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project1</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, sans-serif;
+        }
+
+        body {
+            background: #f5f7fb;
+            display: flex;
+            justify-content: center;
+            padding: 16px;
+            min-height: 100vh;
+        }
+
+        .app {
+            max-width: 1300px;
+            width: 100%;
+            background: #fff;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+            padding: 28px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: #1e293b;
+            margin-bottom: 24px;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            gap: 24px;
+        }
+
+        .panel {
+            background: #f8fafc;
+            border-radius: 24px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-height: 500px;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+
+        input, textarea, button {
+            border: none;
+            outline: none;
+            font-size: 0.95rem;
+            border-radius: 12px;
+        }
+
+        input, textarea {
+            background: #fff;
+            padding: 12px;
+            border: 1.5px solid #e2e8f0;
+            width: 100%;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        button {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .row input {
+            flex: 1;
+        }
+
+        ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        li {
+            background: #fff;
+            padding: 10px 12px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e9eef3;
+        }
+
+        li.done span {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+
+        li span {
+            flex: 1;
+            cursor: pointer;
+            word-break: break-word;
+        }
+
+        .mini-btn {
+            background: transparent;
+            color: #64748b;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+        }
+
+        .mini-btn:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .cal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cal-header button {
+            background: transparent;
+            color: #1e293b;
+            padding: 4px 10px;
+        }
+
+        .cal-header button:hover {
+            background: #e2e8f0;
+        }
+
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            text-align: center;
+            font-size: 0.8rem;
+            flex: 1;
+        }
+
+        .weekday {
+            color: #64748b;
+            padding: 4px 0;
+            font-size: 0.7rem;
+        }
+
+        .day {
+            background: #fff;
+            border-radius: 8px;
+            padding: 8px 0;
+            cursor: pointer;
+            border: 1px solid #eef2f6;
+        }
+
+        .day:hover {
+            background: #eff6ff;
+        }
+
+        .day.empty {
+            background: transparent;
+            border: none;
+            cursor: default;
+        }
+
+        .day.today {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .day.selected {
+            outline: 2px solid #3b82f6;
+        }
+
+        .note-item {
+            background: #fff;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #e9eef3;
+        }
+
+        .note-item p {
+            color: #334155;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin-bottom: 6px;
+        }
+
+        .note-item .note-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .note-item .note-date {
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+
+        .empty-msg {
+            color: #94a3b8;
+            text-align: center;
+            padding: 20px 8px;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 900px) {
+            .panels { grid-template-columns: 1fr; }
+            .panel { min-height: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <h1>Заметки · Календарь · ToDo</h1>
+        <div class="panels">
+            <div class="panel">
+                <h2>ToDo</h2>
+                <div class="row">
+                    <input type="text" id="todoInput" placeholder="Новая задача...">
+                    <button id="addTodoBtn">Добавить</button>
+                </div>
+                <ul id="todoList"></ul>
+                <div class="empty-msg" id="todoEmpty">Нет задач</div>
+            </div>
+
+            <div class="panel">
+                <h2>Календарь</h2>
+                <div class="cal-header">
+                    <button id="prevMonthBtn">Назад</button>
+                    <span id="monthYear"></span>
+                    <button id="nextMonthBtn">Вперёд</button>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+                <div style="text-align:center; font-size:0.8rem; color:#64748b;">
+                    Выбрано: <span id="selectedDate">—</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Заметки</h2>
+                <textarea id="noteInput" placeholder="Текст заметки..."></textarea>
+                <button id="addNoteBtn">Добавить</button>
+                <ul id="notesList"></ul>
+                <div class="empty-msg" id="notesEmpty">Нет заметок</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
