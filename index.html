@@ -273,5 +273,220 @@
             </div>
         </div>
     </div>
+
+    <script>
+        let todos = [
+            { id: 1, text: 'Изучить JS', done: false },
+            { id: 2, text: 'Сделать проект', done: true }
+        ];
+
+        let notes = [
+            { id: 1, text: 'Не забыть про дедлайн', date: new Date() }
+        ];
+
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let selected = null;
+
+        const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+        const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+        const todoList = document.getElementById('todoList');
+        const todoEmpty = document.getElementById('todoEmpty');
+        const todoInput = document.getElementById('todoInput');
+        const addTodoBtn = document.getElementById('addTodoBtn');
+
+        const calGrid = document.getElementById('calGrid');
+        const monthYear = document.getElementById('monthYear');
+        const selectedDate = document.getElementById('selectedDate');
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+
+        const notesList = document.getElementById('notesList');
+        const notesEmpty = document.getElementById('notesEmpty');
+        const noteInput = document.getElementById('noteInput');
+        const addNoteBtn = document.getElementById('addNoteBtn');
+
+        function renderTodos() {
+            todoList.innerHTML = '';
+            if (todos.length === 0) {
+                todoEmpty.style.display = 'block';
+                return;
+            }
+            todoEmpty.style.display = 'none';
+
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                if (todo.done) li.classList.add('done');
+
+                const span = document.createElement('span');
+                span.textContent = todo.text;
+                span.dataset.id = todo.id;
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'mini-btn';
+                delBtn.textContent = 'Удалить';
+                delBtn.dataset.del = todo.id;
+
+                li.appendChild(span);
+                li.appendChild(delBtn);
+                todoList.appendChild(li);
+            });
+        }
+
+        function addTodo() {
+            const text = todoInput.value.trim();
+            if (!text) return;
+            todos.push({ id: Date.now(), text: text, done: false });
+            todoInput.value = '';
+            renderTodos();
+        }
+
+        addTodoBtn.addEventListener('click', addTodo);
+        todoInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter') addTodo();
+        });
+
+        todoList.addEventListener('click', e => {
+            if (e.target.dataset.del) {
+                todos = todos.filter(t => t.id != e.target.dataset.del);
+                renderTodos();
+            } else if (e.target.tagName === 'SPAN' && e.target.dataset.id) {
+                const todo = todos.find(t => t.id == e.target.dataset.id);
+                if (todo) todo.done = !todo.done;
+                renderTodos();
+            }
+        });
+
+        function renderCalendar() {
+            monthYear.textContent = months[currentMonth] + ' ' + currentYear;
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+            const daysCount = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date();
+
+            calGrid.innerHTML = '';
+
+            weekdays.forEach(w => {
+                const d = document.createElement('div');
+                d.className = 'weekday';
+                d.textContent = w;
+                calGrid.appendChild(d);
+            });
+
+            for (let i = 0; i < startOffset; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'day empty';
+                calGrid.appendChild(empty);
+            }
+
+            for (let d = 1; d <= daysCount; d++) {
+                const day = document.createElement('div');
+                day.className = 'day';
+                day.textContent = d;
+                day.dataset.day = d;
+
+                if (d === today.getDate() &&
+                    currentMonth === today.getMonth() &&
+                    currentYear === today.getFullYear()) {
+                    day.classList.add('today');
+                }
+
+                if (selected &&
+                    selected.day === d &&
+                    selected.month === currentMonth &&
+                    selected.year === currentYear) {
+                    day.classList.add('selected');
+                }
+
+                calGrid.appendChild(day);
+            }
+        }
+
+        calGrid.addEventListener('click', e => {
+            if (!e.target.dataset.day) return;
+            const d = Number(e.target.dataset.day);
+            selected = { day: d, month: currentMonth, year: currentYear };
+            const date = new Date(currentYear, currentMonth, d);
+            selectedDate.textContent = date.toLocaleDateString('ru-RU');
+            renderCalendar();
+        });
+
+        prevMonthBtn.addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        });
+
+        function renderNotes() {
+            notesList.innerHTML = '';
+            if (notes.length === 0) {
+                notesEmpty.style.display = 'block';
+                return;
+            }
+            notesEmpty.style.display = 'none';
+
+            notes.forEach(note => {
+                const li = document.createElement('li');
+                li.className = 'note-item';
+
+                const p = document.createElement('p');
+                p.textContent = note.text;
+
+                const foot = document.createElement('div');
+                foot.className = 'note-foot';
+
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'note-date';
+                dateSpan.textContent = note.date.toLocaleString('ru-RU');
+
+                const delBtn = document.createElement('button');
+                delBtn.className = 'mini-btn';
+                delBtn.textContent = 'Удалить';
+                delBtn.dataset.del = note.id;
+
+                foot.appendChild(dateSpan);
+                foot.appendChild(delBtn);
+                li.appendChild(p);
+                li.appendChild(foot);
+                notesList.appendChild(li);
+            });
+        }
+
+        function addNote() {
+            const text = noteInput.value.trim();
+            if (!text) return;
+            notes.push({ id: Date.now(), text: text, date: new Date() });
+            noteInput.value = '';
+            renderNotes();
+        }
+
+        addNoteBtn.addEventListener('click', addNote);
+
+        notesList.addEventListener('click', e => {
+            if (e.target.dataset.del) {
+                notes = notes.filter(n => n.id != e.target.dataset.del);
+                renderNotes();
+            }
+        });
+
+        renderTodos();
+        renderCalendar();
+        renderNotes();
+    </script>
 </body>
 </html>
