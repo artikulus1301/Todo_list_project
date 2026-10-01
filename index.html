@@ -273,16 +273,35 @@
             </div>
         </div>
     </div>
-
     <script>
-        let todos = [
-            { id: 1, text: 'Изучить JS', done: false },
-            { id: 2, text: 'Сделать проект', done: true }
-        ];
+        const API_URL = "http://localhost:5000";
 
-        let notes = [
-            { id: 1, text: 'Не забыть про дедлайн', date: new Date() }
-        ];
+        async function api(path, method = "GET", body = null) {
+            const options = {
+                method,
+                headers: { "Content-Type": "application/json" }
+
+            };
+
+            if (body) options.body = JSON.stringify(body);
+
+            const res= await fetch(API_URL + path, options);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || data.message || "Ошибка");
+            return data;
+        }
+
+        let todos = [];
+        let notes = [];
+
+        async function loadAllData() {
+            todos = await api(`/todos`);
+            notes = await api(`/notes`);
+            renderTodos();
+            renderNotes();
+        }
+
+        loadAllData();
 
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
@@ -307,6 +326,7 @@
         const notesEmpty = document.getElementById('notesEmpty');
         const noteInput = document.getElementById('noteInput');
         const addNoteBtn = document.getElementById('addNoteBtn');
+
 
         function renderTodos() {
             todoList.innerHTML = '';
@@ -335,10 +355,13 @@
             });
         }
 
-        function addTodo() {
+        async function addTodo() {
             const text = todoInput.value.trim();
             if (!text) return;
-            todos.push({ id: Date.now(), text: text, done: false });
+            const newTodo = await api("/todos", "POST", {
+                id: Date.now(), text: text, done: false
+            });
+            todos.push(newTodo);
             todoInput.value = '';
             renderTodos();
         }
@@ -348,15 +371,18 @@
             if (e.key === 'Enter') addTodo();
         });
 
-        todoList.addEventListener('click', e => {
-            if (e.target.dataset.del) {
-                todos = todos.filter(t => t.id != e.target.dataset.del);
-                renderTodos();
-            } else if (e.target.tagName === 'SPAN' && e.target.dataset.id) {
-                const todo = todos.find(t => t.id == e.target.dataset.id);
-                if (todo) todo.done = !todo.done;
-                renderTodos();
-            }
+        todoList.addEventListener("click", async e => {
+        if (e.target.dataset.del) {
+            await api("/todos", "DELETE", { id: Number(e.target.dataset.del) });
+            todos = todos.filter(t => t.id != e.target.dataset.del);
+            renderTodos();
+        } else if (e.target.tagName === "SPAN" && e.target.dataset.id) {
+            const todo = todos.find(t => t.id == e.target.dataset.id);
+            if (!todo) return;
+            todo.done = !todo.done;
+            await api("/todos", "PUT", { id: todo.id, done: todo.done });
+            renderTodos();
+        }
         });
 
         function renderCalendar() {
@@ -452,7 +478,7 @@
 
                 const dateSpan = document.createElement('span');
                 dateSpan.className = 'note-date';
-                dateSpan.textContent = note.date.toLocaleString('ru-RU');
+                dateSpan.textContent = new Date(note.date).toLocaleString("ru-RU");
 
                 const delBtn = document.createElement('button');
                 delBtn.className = 'mini-btn';
@@ -467,18 +493,22 @@
             });
         }
 
-        function addNote() {
+        async function addNote() {
             const text = noteInput.value.trim();
             if (!text) return;
-            notes.push({ id: Date.now(), text: text, date: new Date() });
+            let newNote = await api ("/notes", "POST", {
+            id: Date.now(), text: text, date: new Date()
+            })
+            notes.push(newNote);
             noteInput.value = '';
             renderNotes();
         }
 
         addNoteBtn.addEventListener('click', addNote);
 
-        notesList.addEventListener('click', e => {
+        notesList.addEventListener('click', async e => {
             if (e.target.dataset.del) {
+                await api("/notes", "DELETE", {id: Number(e.target.dataset.del)});
                 notes = notes.filter(n => n.id != e.target.dataset.del);
                 renderNotes();
             }
