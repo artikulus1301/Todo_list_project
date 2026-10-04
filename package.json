@@ -19,6 +19,7 @@
   "homepage": "https://github.com/artikulus1301/Todo_list_project#readme",
   "description": "",
   "dependencies": {
+    "co-body": "^6.2.0",
     "pg": "^8.23.1"
   }
 }
