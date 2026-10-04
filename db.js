@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/project_db'
+  connectionString: process.env.DATABASE_URL || 'postgres://postgres:4067@localhost:5432/project_db'
 });
 
 async function initDB() {
