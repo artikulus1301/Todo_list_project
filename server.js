@@ -1,10 +1,12 @@
-const http = require('http');
-const parse = require('co-body');
-const { pool, initDB } = require('./db');
 
-const PORT = process.env.PORT || 5000;
+import http from "http";
+import parse from "co-body";
+import {pool, initDB} from "./db.js";
 
-// Вспомогательная функция отправки JSON прямо внутри server.js
+
+const PORT = 5000;
+
+
 function sendJSON(res, statusCode, data) {
   res.writeHead(statusCode, {
     'Content-Type': 'application/json',
@@ -16,7 +18,7 @@ function sendJSON(res, statusCode, data) {
 }
 
 const server = http.createServer(async (req, res) => {
-  // CORS Preflight
+  
   if (req.method === 'OPTIONS') {
     res.writeHead(200, {
       'Access-Control-Allow-Origin': '*',
@@ -29,7 +31,7 @@ const server = http.createServer(async (req, res) => {
   const { url, method } = req;
 
   try {
-    // === TODOS ===
+    
     if (url === '/todos') {
       if (method === 'GET') {
         const { rows } = await pool.query('SELECT id, text, done FROM todos ORDER BY id ASC');
@@ -58,7 +60,7 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
-    // === NOTES ===
+    
     if (url === '/notes') {
       if (method === 'GET') {
         const { rows } = await pool.query('SELECT id, text, date FROM notes ORDER BY id ASC');
