@@ -1,6 +1,6 @@
-const http = require('http');
-const parse = require('co-body');
-const { pool, initDB } = require('./db');
+import http from "http";
+import parse from "co-body";
+import { pool, initDB } from "./db.js";
 
 const PORT = process.env.PORT || 5000;
 const corsHeaders = {
